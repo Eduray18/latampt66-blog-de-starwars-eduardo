@@ -1,37 +1,63 @@
-// Import necessary hooks and components from react-router-dom and other libraries.
-import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import PropTypes from "prop-types";  // To define prop types for this component
-import rigoImageUrl from "../assets/img/rigo-baby.jpg"  // Import an image asset
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
+import React from "react";
+import { useParams, Link } from "react-router-dom";
+import useGlobalReducer from "../hooks/useGlobalReducer";
 
-// Define and export the Single component which displays individual item details.
-export const Single = props => {
-  // Access the global state using the custom hook.
-  const { store } = useGlobalReducer()
+export const Single = () => {
+  const { store } = useGlobalReducer();
+  const { type, theId } = useParams();
 
-  // Retrieve the 'theId' URL parameter using useParams hook.
-  const { theId } = useParams()
-  const singleTodo = store.todos.find(todo => todo.id === parseInt(theId));
+  const listName = type === "people" ? "people" : type === "planets" ? "planets" : "vehicles";
+  const item = store[listName]?.find(i => i.uid === theId);
+
+  if (!item) return <div className="container text-center mt-5"><h1>Loading...</h1></div>;
 
   return (
-    <div className="container text-center">
-      {/* Display the title of the todo element dynamically retrieved from the store using theId. */}
-      <h1 className="display-4">Todo: {singleTodo?.title}</h1>
-      <hr className="my-4" />  {/* A horizontal rule for visual separation. */}
+    <div className="container mt-5">
+      <div className="row d-flex align-items-center mb-5">
+        <div className="col-md-6">
+          <img 
+            src={`https://starwars-visualguide.com/assets/img/${type === "people" ? "characters" : type}/${theId}.jpg`} 
+            className="img-fluid rounded" 
+            alt={item.name}
+            onError={(e) => { e.target.src = "https://starwars-visualguide.com/assets/img/placeholder.jpg"; }}
+          />
+        </div>
+        <div className="col-md-6 text-center">
+          <h1 className="display-4 fw-bold">{item.name}</h1>
+          <p className="lead mt-4">A long time ago in a galaxy far, far away... Descubre todo sobre {item.name}.</p>
+        </div>
+      </div>
 
-      {/* A Link component acts as an anchor tag but is used for client-side routing to prevent page reloads. */}
-      <Link to="/">
-        <span className="btn btn-primary btn-lg" href="#" role="button">
-          Back home
-        </span>
-      </Link>
+      <hr className="border-danger border-2 mb-4" />
+
+      <div className="row text-danger text-center fw-bold small">
+        <div className="col border-end border-danger">Name<br/><span className="text-dark fw-normal">{item.name}</span></div>
+        {type === "people" && (
+          <>
+            <div className="col border-end border-danger">Birth Year<br/><span className="text-dark fw-normal">{item.birth_year}</span></div>
+            <div className="col border-end border-danger">Gender<br/><span className="text-dark fw-normal">{item.gender}</span></div>
+            <div className="col">Height<br/><span className="text-dark fw-normal">{item.height}</span></div>
+          </>
+        )}
+        {type === "planets" && (
+          <>
+            <div className="col border-end border-danger">Climate<br/><span className="text-dark fw-normal">{item.climate}</span></div>
+            <div className="col border-end border-danger">Population<br/><span className="text-dark fw-normal">{item.population}</span></div>
+            <div className="col">Diameter<br/><span className="text-dark fw-normal">{item.diameter}</span></div>
+          </>
+        )}
+        {type === "vehicles" && (
+          <>
+            <div className="col border-end border-danger">Model<br/><span className="text-dark fw-normal">{item.model}</span></div>
+            <div className="col border-end border-danger">Class<br/><span className="text-dark fw-normal">{item.vehicle_class}</span></div>
+            <div className="col">Length<br/><span className="text-dark fw-normal">{item.length}</span></div>
+          </>
+        )}
+      </div>
+
+      <div className="text-center mt-5 pb-5">
+        <Link to="/" className="btn btn-primary btn-lg">Back home</Link>
+      </div>
     </div>
   );
-};
-
-// Use PropTypes to validate the props passed to this component, ensuring reliable behavior.
-Single.propTypes = {
-  // Although 'match' prop is defined here, it is not used in the component.
-  // Consider removing or using it as needed.
-  match: PropTypes.object
 };
